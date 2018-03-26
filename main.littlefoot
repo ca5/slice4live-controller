@@ -19,7 +19,7 @@
 int buttonWidth, buttonSpacing;
 int gridSize, maxButtonIndex;
 int buttonPlayedIndex, buttonTouchedIndex, buttonSequenceIndex;
-int functionTouchedIndex;
+int xypadTouchedIndex;
 float lastButtonVz;
 
 int mididebug1, mididebug2, mididebug3;
@@ -68,7 +68,7 @@ int getTouchedButton (float x, float y)
   return -1
 }
 
-int getTouchedFunction (float x, float y)
+int getTouchedXYpad (float x, float y)
 {
 	int xx = int (x * (0.95 / 2.0) * float (gridSize)) - 1;
   int yy = (int (y * (0.95 / 2.0) * float (gridSize))) - 1;
@@ -161,7 +161,7 @@ void initialise()
   buttonTouchedIndex = 0;
   lastButtonVz = 0.0;
   buttonSequenceIndex = 0;
-  functionTouchedIndex = 0;
+  xypadTouchedIndex = 0;
 
 	buttonWidth = 15 / gridSize;
 	buttonSpacing = gridSize > 1 ? (15 - gridSize * buttonWidth) / (gridSize - 1) : 0;
@@ -197,9 +197,9 @@ void touchStart (int touchIndex, float x, float y, float z, float vz)
     sendNoteOn ((channel - 1), note, velocity);
   }
 
-  int touchedFunction = getTouchedFunction(x, y);
-  if (touchedFunction > 0) {
-    functionTouchedIndex = touchedIndex;
+  int touchedXYpad = getTouchedXYpad(x, y);
+  if (touchedXYpad > 0) {
+    xypadTouchedIndex = touchedIndex;
   }
 }
 
