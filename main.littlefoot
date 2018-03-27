@@ -19,14 +19,21 @@
 int buttonWidth, buttonSpacing;
 int gridSize, maxButtonIndex;
 int buttonPlayedIndex, buttonTouchedIndex, buttonSequenceIndex;
+
 int xypadTouchedIndex;
 int xypadX;
 int xypadY;
 float lastButtonVz;
 
-int debug1;
-int debug2;
+int xypadFunctionThreshold;
+int xypadButtonCC;
+int xypadPadPressureCC;
+int xypadPadXCC;
+int xypadPadYCC;
+int xypadPadMode;
+int lastTouchStartTime;
 
+int debug1, debug2, debug3;
 int mididebug1, mididebug2, mididebug3;
 
 //==============================================================================
@@ -79,7 +86,7 @@ int getTouchedXYpad (float x, float y)
   int yy = (int (y * (0.95 / 2.0) * float (gridSize))) - 1;
 
   if (xx >= 0 && yy >= 0 &&
-      xx < gridSize - 1 && yy < gridSize - 1) {
+      xx < gridSize - 2 && yy < gridSize - 2) {
         //return xx - 1 + yy * (gridSize - 2) 
         return 1;
       }
@@ -167,6 +174,11 @@ void initialise()
   lastButtonVz = 0.0;
   buttonSequenceIndex = 0;
   xypadTouchedIndex = -1;
+  xypadFunctionThreshold = 200; //ms
+  xypadButtonCC = 93;
+  xypadPadPressureCC = 94;
+  xypadPadXCC = 95;
+  xypadPadYCC = 96;
 
 	buttonWidth = 15 / gridSize;
 	buttonSpacing = gridSize > 1 ? (15 - gridSize * buttonWidth) / (gridSize - 1) : 0;
@@ -184,29 +196,34 @@ void repaint()
 	if (isConnectedToHost())
         drawButtons();
         //debug
-        //drawNumber(xypadX, 0xffff0000, 0, 0);
-        //drawNumber(xypadY, 0xff00ff00, 0, 5);
-        //drawNumber(xypadTouchedIndex, 0xff0000ff, 0, 10);
+        drawNumber(debug2, 0xffff0000, 0, 0);
+        drawNumber(debug1, 0xff00ff00, 0, 5);
+        drawNumber(debug3, 0xff0000ff, 0, 10);
 }
 
 //==============================================================================
 void touchStart (int touchIndex, float x, float y, float z, float vz)
 {
   int touchedButton = getTouchedButton(x, y);
-  if (touchedButton > 0) {
+  if (touchedButton >= 0) {
+    debug2 = touchedButton;
     buttonPlayedIndex = touchedButton;
     buttonTouchedIndex = touchIndex;
     int note = buttonPlayedIndex;
     int velocity = clamp (0, 127, int (vz * 127.0));
     if (velocity == 0) ++velocity; 
-    lastButtonVz = vz;
     sendNoteOn ((channel - 1), note, velocity);
+    lastButtonVz = vz;
   }
 
   int touchedXYpad = getTouchedXYpad(x, y);
   if (touchedXYpad > 0) {
     xypadTouchedIndex = touchIndex;
+    xypadPadMode = 0;
+    debug3 = xypadPadMode;
   }
+
+  lastTouchStartTime = getMillisecondCounter();
 }
 
 void touchMove (int touchIndex, float x, float y, float z, float vz)
@@ -220,36 +237,57 @@ void touchMove (int touchIndex, float x, float y, float z, float vz)
   }
   if (touchIndex = xypadTouchedIndex){
     int touchedXYpad = getTouchedXYpad(x, y);
+    int velocity = clamp (0, 127, int (vz * 127.0));
     if (touchedXYpad > 0){
-      xypadX = max(
-                  min(
-                    int(map(x, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
-                    127
-                  ),
-                  0
-                );
-      xypadY = max(
-                  min(
-                    int(map(y, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
-                    127
-                  ),
-                  0
-                );
+      int now = getMillisecondCounter();
+      debug1 = now - lastTouchStartTime;
+      if (now - lastTouchStartTime > xypadFunctionThreshold){
+        //xypad mode
+        if (xypadPadMode == 0){
+          xypadPadMode = 1;
+          debug3 = xypadPadMode;
+          sendCC((channel - 1), xypadPadPressureCC, velocity);
+        }
+        xypadX = max(
+                    min(
+                      int(map(x, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
+                      127
+                    ),
+                    0
+                  );
+        xypadY = max(
+                    min(
+                      int(map(y, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
+                      127
+                    ),
+                    0
+                  );
+        sendCC((channel - 1), xypadPadXCC, xypadX);
+        sendCC((channel - 1), xypadPadYCC, xypadY);
+      }
     }
   }
 }
 
 void touchEnd (int touchIndex, float x, float y, float z, float vz)
 {
+  int velocity = clamp (0, 127, int (vz * 127.0));
   if (touchIndex == buttonTouchedIndex)
   {
     int note = buttonPlayedIndex;
-    int velocity = clamp (0, 127, int (vz * 127.0));
     sendNoteOff ((channel - 1), note, velocity);
     buttonPlayedIndex = -1;
   }
-  if (touchIndex = xypadTouchedIndex){
+  else if (touchIndex = xypadTouchedIndex){
     xypadTouchedIndex = -1;
+    if (xypadPadMode == 0){
+      sendCC((channel - 1), xypadButtonCC, velocity);
+    }
+    else{
+      sendCC((channel - 1), xypadPadPressureCC, 0);
+      xypadPadMode = 0;
+      debug3 = xypadPadMode;
+    }
   }
 }
 
