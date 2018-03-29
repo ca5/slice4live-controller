@@ -196,9 +196,9 @@ void repaint()
 	if (isConnectedToHost())
         drawButtons();
         //debug
-        drawNumber(mididebug1, 0xffff0000, 0, 0);
-        drawNumber(mididebug2, 0xff00ff00, 0, 5);
-        drawNumber(mididebug3, 0xff0000ff, 0, 10);
+        //drawNumber(mididebug1, 0xffff0000, 0, 0);
+        //drawNumber(mididebug2, 0xff00ff00, 0, 5);
+        //drawNumber(mididebug3, 0xff0000ff, 0, 10);
 }
 
 //==============================================================================
@@ -235,7 +235,7 @@ void touchMove (int touchIndex, float x, float y, float z, float vz)
   if (touchIndex = xypadTouchedIndex){
     int touchedXYpad = getTouchedXYpad(x, y);
     int velocity = clamp (0, 127, int (vz * 127.0));
-     (touchedXYpad > 0){
+    if (touchedXYpad > 0){
       int now = getMillisecondCounter();
       if (now - lastTouchStartTime > xypadFunctionThreshold){
         //xypad mode
