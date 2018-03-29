@@ -174,7 +174,7 @@ void initialise()
   lastButtonVz = 0.0;
   buttonSequenceIndex = 0;
   xypadTouchedIndex = 0;
-  xypadFunctionThreshold = 200; //ms
+  xypadFunctionThreshold = 100; //ms
   xypadButtonCC = 93;
   xypadPadPressureCC = 94;
   xypadPadXCC = 95;
@@ -234,15 +234,13 @@ void touchMove (int touchIndex, float x, float y, float z, float vz)
   }
   if (touchIndex = xypadTouchedIndex){
     int touchedXYpad = getTouchedXYpad(x, y);
-    int velocity = clamp (0, 127, int (vz * 127.0));
+    int velocity = clamp (0, 127, int (z * 127.0));
     if (touchedXYpad > 0){
       int now = getMillisecondCounter();
       if (now - lastTouchStartTime > xypadFunctionThreshold){
         //xypad mode
-        if (xypadPadMode == 0){
-          xypadPadMode = 1;
-          sendCC((channel - 1), xypadPadPressureCC, velocity);
-        }
+        xypadPadMode = 1;
+        sendCC((channel - 1), xypadPadPressureCC, velocity);
         xypadX = max(
                     min(
                       int(map(x, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
