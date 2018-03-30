@@ -173,29 +173,38 @@ void drawButtons()
 
 void drawPad(){
   int colour = 0x08ffffff;
+  int wait = 1;
   if (sideButton == 1){
     if (xypadPadMode){
       //pad pressed
       colour = 0x00ff00ff | int(xypadPadPressure * 255.0) << 4 * 6;
+      wait = 0;
     }
     else {
       //pad wait
-      colour = 0x03ff00ff;
+      colour = 0x05ff00ff;
     }
   }
   else {
     if (xypadButtonPressure == 1) {
-      colour = 0xff0000ff;
+      colour = 0x3f0c0cfc;
+      wait = 0;
     }
     else if (xypadButtonPressure == 2) {
-      colour = 0xffff0000;
+      colour = 0x3fff0000;
+      wait = 0;
     }
   }
-  blendGradientRect(colour, 
-                    0x08ffffff & colour,
-                    colour,
-                    0x08ffffff & colour,
-                    buttonWidth, buttonWidth, padWidth, padWidth);
+  if (wait) {
+    blendRect(colour, buttonWidth, buttonWidth, padWidth, padWidth);
+  }
+  else {
+    blendGradientRect(colour, 
+                      0x08ffffff & colour,
+                      0x003f3f3f | colour,
+                      0x08ffffff & colour,
+                      buttonWidth, buttonWidth, padWidth, padWidth);
+  }
 }
 
 void drawPointer(){
