@@ -198,6 +198,20 @@ void drawPad(){
                     buttonWidth, buttonWidth, padWidth, padWidth);
 }
 
+void drawPointer(){
+  int colour = 0x00ffffff;
+  if (sideButton == 1){
+    if (xypadPadMode){
+      //pad pressed
+      colour = 0xffffffff;
+    }
+  }
+
+  int x = int(float(xypadX) / 127.0 * float(padWidth - 2));
+  int y = int(float(xypadY) / 127.0 * float(padWidth - 2));
+  blendRect(colour, x + buttonWidth, y + buttonWidth, 2, 2);
+}
+
 //==============================================================================
 void initialise()
 {
@@ -234,6 +248,7 @@ void repaint()
 	if (isConnectedToHost())
         drawButtons();
         drawPad();
+        drawPointer();
         //debug
         //drawNumber(xypadButtonPressure, 0xffff0000, 0, 0);
         //drawNumber(debug2, 0xff00ff00, 0, 5);
