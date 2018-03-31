@@ -89,7 +89,7 @@ int getTouchedButton (float x, float y)
 int getTouchedXYpad (float x, float y)
 {
 	int xx = int (x * (0.95 / 2.0) * float (gridSize)) - 1;
-  int yy = (int (y * (0.95 / 2.0) * float (gridSize))) - 1;
+  int yy = int (y * (0.95 / 2.0) * float (gridSize)) - 1;
 
   if (xx >= 0 && yy >= 0 &&
       xx < gridSize - 2 && yy < gridSize - 2) {
@@ -259,7 +259,7 @@ void repaint()
         drawPad();
         drawPointer();
         //debug
-        //drawNumber(xypadButtonPressure, 0xffff0000, 0, 0);
+        //drawNumber(debug1, 0xffff0000, 0, 0);
         //drawNumber(debug2, 0xff00ff00, 0, 5);
         //drawNumber(debug3, 0xff0000ff, 0, 10);
 }
@@ -306,14 +306,14 @@ void touchMove (int touchIndex, float x, float y, float z, float vz)
         xypadPadPressure = z;
         xypadX = max(
                     min(
-                      int(map(x, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
+                      int(map(x / 0.95, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
                       127
                     ),
                     0
                   );
         xypadY = max(
                     min(
-                      int(map(y, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
+                      int(map(y / 0.95, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
                       127
                     ),
                     0
