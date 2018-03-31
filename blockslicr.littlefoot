@@ -306,14 +306,14 @@ void touchMove (int touchIndex, float x, float y, float z, float vz)
         xypadPadPressure = z;
         xypadX = max(
                     min(
-                      int(map(x / 0.95, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
+                      int(map(x / 0.90, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
                       127
                     ),
                     0
                   );
         xypadY = max(
                     min(
-                      int(map(y / 0.95, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
+                      int(map(y / 0.90, 2.0 / float(gridSize), 2.0 - 2.0 / float(gridSize), 0.0, 127.0)),
                       127
                     ),
                     0
