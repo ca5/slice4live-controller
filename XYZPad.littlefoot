@@ -1,0 +1,71 @@
+/*
+<metadata description="Minimal XYZ Pad" details="XY pad with the addition of pressure (Z), sending out MIDI CC. You can set MIDI channel."
+          target="Lightpad" 
+          tags="MIDI;Controller;">
+    <variables>
+        <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" displayMode="stepper" tooltip="The MIDI channel that values are sent on" />
+    </variables>
+</metadata>
+*/
+
+int ccX;:with
+int ccY;
+int ccZ;
+
+void initialise()
+{
+	for (int i = 0; i < 32; ++i)
+        setLocalConfigActiveState (i, false, false);
+}
+
+void touchStart (int index, float x, float y, float z, float vz)
+{
+    addPressurePoint (0xFFFFFFFF, x, y, z * 5.0);
+    ccX = int(map(x, 0.07, 1.93, 0.0, 127.0));//X座標のデータ(0.07~1.93)を0~127に変換
+    ccY = int(map(y, 0.07, 1.93, 0.0, 127.0));//Y座標のデータ(0.07~1.93)を0~127に変換
+    ccZ = int(map(z, 0.0, 1.0, 0.0, 127.0));//Z(プレッシャー)のデータを(0.0~1.0)を0~127に変換
+    sendCC ((channel - 1), 60, ccX);//X座標 CC60
+    sendCC ((channel - 1), 61, ccY);//Y座標 CC61
+    sendCC ((channel - 1), 62, ccZ);//プレッシャー  CC62
+}
+
+void touchMove (int index, float x, float y, float z, float vz)
+{
+    addPressurePoint (0xFFFFFFFF, x, y, z * 5.0);
+    ccX = int(map(x, 0.07, 1.93, 0.0, 127.0));//X座標のデータ(0.07~1.93)を0~127に変換
+    ccY = int(map(y, 0.07, 1.93, 0.0, 127.0));//Y座標のデータ(0.07~1.93)を0~127に変換
+    ccZ = int(map(z, 0.0, 1.0, 0.0, 127.0));//Z(プレッシャー)のデータを(0.0~1.0)を0~127に変換
+    sendCC ((channel - 1), 60, ccX);//X座標 CC60
+    sendCC ((channel - 1), 61, ccY);//Y座標 CC61
+    sendCC ((channel - 1), 62, ccZ);//プレッシャー  CC62
+}
+
+void touchEnd (int touchIndex, float x, float y, float z, float vz)
+{
+    ccX = 0;
+    ccY = 0;
+    ccZ = 0;
+    sendCC ((channel - 1), 60, ccX);//X座標 CC60
+    sendCC ((channel - 1), 61, ccY);//Y座標 CC61
+    sendCC ((channel - 1), 62, ccZ);//プレッシャー  CC62
+}
+
+void drawBackground(){
+    int colour = 0x8000ff00;
+    blendGradientRect(colour, //fixme
+                        colour & 0xff202020,
+                        colour & 0xf0101010,
+                        colour & 0xff8020ff,
+                        0, 0, 15, 15);
+}
+
+void repaint()
+{
+    clearDisplay();
+    drawBackground();
+    drawPressureMap();//指の軌跡を描画する
+    fadePressureMap();//古い軌跡から徐々にフェードアウト
+    //drawNumber(ccX, 0xffff0000, 0, 0);
+    //drawNumber(ccY, 0xff00ff00, 0, 5); 
+    //drawNumber(ccZ, 0xff0000ff, 0, 10); 
+}
